@@ -1,4 +1,4 @@
-# Compiled Object files
+﻿# Compiled Object files
 *.slo
 *.lo
 *.o
@@ -26,3 +26,12 @@
 *.exe
 *.out
 *.app
+*.suo
+*.sln
+*.opensdf
+*.sdf
+*.vcxproj
+*.filters
+
+# Folder
+Debug/
