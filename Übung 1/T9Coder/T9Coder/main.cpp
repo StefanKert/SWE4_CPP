@@ -13,7 +13,7 @@
 using namespace std;
 
 static map<string, string>  WordDictionary;
-
+static map<int, map<string, string>> WordWithLengthDictionary;
 
 map<string, string> getWordsFromDictionaryFile(){
 	ifstream fin;
@@ -29,11 +29,9 @@ map<string, string> getWordsFromDictionaryFile(){
 		if (line.find("%") != 0)
 			words[line] = line;
 	}
-
-	cout << "Read " << words.size() << " values";
 	return words;
 }
-map<int, map<string, string>> getSetWithLengthForWords(map<string, string> words){
+map<int, map<string, string>> getSetWithLengthForWords(map<string, string> & words){
 	map<int, map<string, string>> lengthWorList;
 	int length = 0;
 	for_each(words.begin(), words.end(), [&](const pair<string, string> word){
@@ -41,7 +39,6 @@ map<int, map<string, string>> getSetWithLengthForWords(map<string, string> words
 	});
 	return lengthWorList;
 }
-
 
 vector<T9MappingEntry> initializeT9Wordbook(){
 	vector<T9MappingEntry> t9WorkBook;
@@ -59,21 +56,24 @@ vector<T9MappingEntry> initializeT9Wordbook(){
 }
 
 int main(int argc, char *argv[]) {
+	cout << "Load dictionary from disk.... " << endl;
 	WordDictionary = getWordsFromDictionaryFile();
+	WordWithLengthDictionary = getSetWithLengthForWords(WordDictionary);
+	cout << "Dictionary succesfully loaded. (" << WordDictionary.size() << " Entries) "<< endl;
 	T9Converter converter(initializeT9Wordbook());
-	string result = converter.Word2number("kiss");
+	auto result = converter.Word2number("kiss");
 	cout << "The Result for kiss is : " << result << endl;
 
-	auto resultNumber2Strings = converter.Number2strings("5477");
+	auto resultNumber2Strings = converter.Number2strings("4355");
 	cout << "The Result for number2strings is : " << resultNumber2Strings.size() << endl;
 
-	auto resultNumber2Strings2 = converter.Number2Words("5477", WordDictionary);
+	auto resultNumber2Strings2 = converter.Number2Words("4355", WordDictionary);
 	cout << "The amount of Results for number2strings2 is : " << resultNumber2Strings2.size() << endl;
 	for_each(resultNumber2Strings2.begin(), resultNumber2Strings2.end(), [&](const string entry){
 		cout << entry << endl;
 	});
 
-	auto resultNumber2Strings3 = converter.Number2WordsByLength("5477", getSetWithLengthForWords(WordDictionary));
+	auto resultNumber2Strings3 = converter.Number2WordsByLength("4355", WordWithLengthDictionary);
 	cout << "The amount of Results for number2strings3 is : " << resultNumber2Strings3.size() << endl;
 	for_each(resultNumber2Strings3.begin(), resultNumber2Strings3.end(), [&](const string entry){
 		cout << entry << endl;

@@ -62,7 +62,7 @@ vector<string> T9Converter::Number2strings(string digits){
 	return entries;
 }
 
-vector<string> T9Converter::Number2Words(string digits, map<string, string> wordDictionary){
+vector<string> T9Converter::Number2Words(string digits, map<string, string> & wordDictionary){
 	vector<string> entries;
 	vector<string> allPossibleEntries;
 	int loops = 0;
@@ -75,7 +75,8 @@ vector<string> T9Converter::Number2Words(string digits, map<string, string> word
 	return entries;
 }
 
-vector<string> T9Converter::Number2WordsByLength(string digits, map<int, map<string, string>> wordDictionary){
-	auto result = this->Number2Words(digits, wordDictionary[digits.size()]);
+vector<string> T9Converter::Number2WordsByLength(string digits, map<int, map<string, string>> & wordDictionary){
+	auto dict = wordDictionary[digits.size()];
+	auto result = this->Number2Words(digits, dict);
 	return result;
 }

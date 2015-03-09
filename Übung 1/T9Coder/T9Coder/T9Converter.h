@@ -18,7 +18,7 @@ public:
 	string Word2number(string word);
 	vector<string> TestMethod(vector<string> alreadyInsertedEntries, T9MappingEntry entry);
 	vector<string> Number2strings(string digits);
-	vector<string> Number2Words(string digits, map<string, string> wordDictionary);
-	vector<string> Number2WordsByLength(string digits, map<int, map<string, string>> wordDictionary);
+	vector<string> Number2Words(string digits, map<string, string> & wordDictionary);
+	vector<string> Number2WordsByLength(string digits, map<int, map<string, string>> & wordDictionary);
 };
 
