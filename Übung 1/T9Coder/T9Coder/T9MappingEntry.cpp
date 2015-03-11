@@ -12,7 +12,7 @@ T9MappingEntry::T9MappingEntry(string charsToMap, int digitToMap) : mappingChars
 T9MappingEntry::~T9MappingEntry() {}
 
 bool T9MappingEntry::IsCharAvailableInMappingEntry(char charToCheck){
-	return this->mappingChars.find(charToCheck) != string::npos;
+	return this->mappingChars.find(tolower(charToCheck)) != string::npos;
 }
 string T9MappingEntry::GetMappingDigit(){
 	return to_string(this->mappingDigit);

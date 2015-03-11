@@ -9,36 +9,14 @@
 
 #include "T9MappingEntry.h"
 #include "T9Converter.h"
+#include "utility.h"
 
 using namespace std;
 
 static map<string, string>  WordDictionary;
 static map<int, map<string, string>> WordWithLengthDictionary;
+static map<string, map<string, string>> WordWithT9CodeDictionary;
 
-map<string, string> getWordsFromDictionaryFile(){
-	ifstream fin;
-	string fileName = "de_neu.dic";
-	fin.open(fileName);
-	if (fin.fail()) { // same as operator!() tests both failbit and badbit
-		cerr << "file " << fileName << " not found" << endl;
-		exit(-2);
-	}
-	map<string, string>  words;
-	ifstream input("de_neu.dic");
-	for (string line; getline(input, line);){
-		if (line.find("%") != 0)
-			words[line] = line;
-	}
-	return words;
-}
-map<int, map<string, string>> getSetWithLengthForWords(map<string, string> & words){
-	map<int, map<string, string>> lengthWorList;
-	int length = 0;
-	for_each(words.begin(), words.end(), [&](const pair<string, string> word){
-		lengthWorList[word.second.size()].insert(make_pair(word.first, word.second));
-	});
-	return lengthWorList;
-}
 
 vector<T9MappingEntry> initializeT9Wordbook(){
 	vector<T9MappingEntry> t9WorkBook;
@@ -50,34 +28,65 @@ vector<T9MappingEntry> initializeT9Wordbook(){
 	t9WorkBook.push_back(*new T9MappingEntry("pqrs", 7));
 	t9WorkBook.push_back(*new T9MappingEntry("tuv", 8));
 	t9WorkBook.push_back(*new T9MappingEntry("wxyz", 9));
-	//ostream_iterator<T9MappingEntry> out_it(cout, "\n");
-	//copy(t9WorkBook.begin(), t9WorkBook.end(), out_it);
 	return t9WorkBook;
 }
 
-int main(int argc, char *argv[]) {
-	cout << "Load dictionary from disk.... " << endl;
-	WordDictionary = getWordsFromDictionaryFile();
-	WordWithLengthDictionary = getSetWithLengthForWords(WordDictionary);
-	cout << "Dictionary succesfully loaded. (" << WordDictionary.size() << " Entries) "<< endl;
+void loadWordsFromDictionaryFile(){
+	ReadAllLinesFromFile("de_neu.dic", [&](string line){
+		if (line.find("%") != 0){
+			WordDictionary[StringToUpper(line)] = line;
+		}
+	});
+}
+void loadSetWithLengthForWords(map<string, string> & words){
+	int length = 0;
+	for_each(words.begin(), words.end(), [&](const pair<string, string> word){
+		WordWithLengthDictionary[word.second.size()].insert(make_pair(word.first, word.second));
+	});
+}
+void loadMapWithT9CodeForWords(map<string, string> & words){
+	int length = 0;
 	T9Converter converter(initializeT9Wordbook());
+	for_each(words.begin(), words.end(), [&](const pair<string, string> word){
+		WordWithT9CodeDictionary[converter.Word2number(word.first)].insert(make_pair(word.first, word.second));
+	});
+}
+
+void InitializeDictionaries(){
+	cout << "Load dictionary from disk.... " << endl;
+	loadWordsFromDictionaryFile();
+	loadSetWithLengthForWords(WordDictionary);
+	//loadMapWithT9CodeForWords(WordDictionary);
+	cout << "Dictionary succesfully loaded. (" << WordDictionary.size() << " Entries) " << endl;
+}
+
+int main(int argc, char *argv[]) {
+	InitializeDictionaries();
+	T9Converter converter(initializeT9Wordbook());
+
 	auto result = converter.Word2number("kiss");
-	cout << "The Result for kiss is : " << result << endl;
+	cout << "The Result for Word2number is : " << result << endl;
 
 	auto resultNumber2Strings = converter.Number2strings("4355");
-	cout << "The Result for number2strings is : " << resultNumber2Strings.size() << endl;
+	cout << "The Result for Number2strings is : " << resultNumber2Strings.size() << endl;
 
-	auto resultNumber2Strings2 = converter.Number2Words("4355", WordDictionary);
-	cout << "The amount of Results for number2strings2 is : " << resultNumber2Strings2.size() << endl;
-	for_each(resultNumber2Strings2.begin(), resultNumber2Strings2.end(), [&](const string entry){
+	auto resultNumber2Words = converter.Number2Words("4355", WordDictionary);
+	cout << "The amount of Results for Number2Words is : " << resultNumber2Words.size() << endl;
+	for_each(resultNumber2Words.begin(), resultNumber2Words.end(), [&](const string entry){
 		cout << entry << endl;
 	});
 
-	auto resultNumber2Strings3 = converter.Number2WordsByLength("4355", WordWithLengthDictionary);
-	cout << "The amount of Results for number2strings3 is : " << resultNumber2Strings3.size() << endl;
-	for_each(resultNumber2Strings3.begin(), resultNumber2Strings3.end(), [&](const string entry){
+	auto resultNumber2WordsByLength = converter.Number2WordsByLength("4355", WordWithLengthDictionary);
+	cout << "The amount of Results for Number2WordsByLength is : " << resultNumber2WordsByLength.size() << endl;
+	for_each(resultNumber2WordsByLength.begin(), resultNumber2WordsByLength.end(), [&](const string entry){
 		cout << entry << endl;
 	});
-	cin;
+
+	auto resultNumberPrefix2Word = converter.NumberPrefix2Word("43", WordDictionary);
+	cout << "The amount of Results for NumberPrefix2Word is : " << resultNumberPrefix2Word.size() << endl;
+	for_each(resultNumberPrefix2Word.begin(), resultNumberPrefix2Word.end(), [&](const string entry){
+		cout << entry << endl;
+	});
+	system("pause");
 	return 0;
 }

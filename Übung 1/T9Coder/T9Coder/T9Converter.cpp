@@ -2,13 +2,12 @@
 #include <string>
 #include <iostream>
 #include <algorithm>  
-#include <fstream>
 #include <vector>
 #include <iterator>
-#include <list>
 #include <map>
 #include "T9Converter.h"
 #include "T9MappingEntry.h"
+#include "utility.h"
 
 T9Converter::T9Converter(vector<T9MappingEntry> t9MappingEntries) : _t9MappingEntries(t9MappingEntries) {}
 
@@ -36,9 +35,10 @@ vector<string> T9Converter::TestMethod(vector<string> alreadyInsertedEntries, T9
 		});
 	}
 	else{
-		for (auto iterator = mappingChars.begin(); iterator != mappingChars.end(); iterator++){
-			for (auto listIterator = alreadyInsertedEntries.begin(); listIterator != alreadyInsertedEntries.end(); listIterator++){
-				entries.push_back(*listIterator + *iterator);
+		for (auto value : mappingChars)
+		{
+			for (auto entry : alreadyInsertedEntries){
+				entries.push_back(entry + value);
 			}
 		}
 	}
@@ -48,9 +48,9 @@ vector<string> T9Converter::TestMethod(vector<string> alreadyInsertedEntries, T9
 vector<string> T9Converter::Number2strings(string digits){
 	vector<string> entries;
 	auto wordBook = this->_t9MappingEntries;
-	for_each(digits.begin(), digits.end(), [&](const char character){
+	for (auto digitChar : digits){
 		auto foundEntry = find_if(wordBook.begin(), wordBook.end(), [&](T9MappingEntry &entry){
-			return entry.GetMappingDigit()[0] == character;
+			return entry.GetMappingDigit()[0] == digitChar;
 		});
 		if (wordBook.end() == foundEntry){
 			throw "No entry found for " + digits;
@@ -58,17 +58,15 @@ vector<string> T9Converter::Number2strings(string digits){
 		else{
 			entries = this->TestMethod(entries, *foundEntry);
 		}
-	});
+	}
 	return entries;
 }
 
 vector<string> T9Converter::Number2Words(string digits, map<string, string> & wordDictionary){
 	vector<string> entries;
-	vector<string> allPossibleEntries;
-	int loops = 0;
-	allPossibleEntries = this->Number2strings(digits);
+	auto allPossibleEntries = this->Number2strings(digits);
 	for_each(allPossibleEntries.begin(), allPossibleEntries.end(), [&](const string entry){
-		if (wordDictionary[entry] != ""){
+		if (wordDictionary[StringToUpper(entry)] != ""){
 			entries.push_back(wordDictionary[entry]);
 		}
 	});
@@ -76,7 +74,38 @@ vector<string> T9Converter::Number2Words(string digits, map<string, string> & wo
 }
 
 vector<string> T9Converter::Number2WordsByLength(string digits, map<int, map<string, string>> & wordDictionary){
-	auto dict = wordDictionary[digits.size()];
-	auto result = this->Number2Words(digits, dict);
-	return result;
+	return this->Number2Words(digits, wordDictionary[digits.size()]);
+}
+
+vector<string> T9Converter::NumberPrefix2Word(string digits, map<string, string> & wordDictionary){
+	vector<string> entries;
+	auto allPossibleEntries = this->Number2strings(digits);
+	for_each(allPossibleEntries.begin(), allPossibleEntries.end(), [&](const string entry){
+		for_each(wordDictionary.begin(), wordDictionary.end(), [&](const pair<string, string> pair){
+			if (pair.first.substr(0, entry.size()) == StringToUpper(entry)){
+				if (pair.second != ""){
+					entries.push_back(pair.second);
+				}
+			}
+		});
+	});
+ 	return entries;
+}
+
+vector<string> T9Converter::NumberPrefix2WordTest(string digits, map<string, map<string, string>> & wordDictionary){
+	vector<string> entries;
+	auto allPossibleEntries = this->Number2strings(digits);
+	for (auto entry : allPossibleEntries){
+		auto test = lower_bound(wordDictionary.begin(), wordDictionary.end(), digits);
+	}
+	for_each(allPossibleEntries.begin(), allPossibleEntries.end(), [&](const string entry){
+		for_each(wordDictionary.begin(), wordDictionary.end(), [&](const pair<string, string> pair){
+			if (pair.first.substr(0, entry.size()) == StringToUpper(entry)){
+				if (pair.second != ""){
+					entries.push_back(pair.second);
+				}
+			}
+		});
+	});
+	return entries;
 }
