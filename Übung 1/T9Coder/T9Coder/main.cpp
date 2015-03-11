@@ -84,9 +84,6 @@ int main(int argc, char *argv[]) {
 
 	auto resultNumberPrefix2Word = converter.NumberPrefix2Word("43", WordDictionary);
 	cout << "The amount of Results for NumberPrefix2Word is : " << resultNumberPrefix2Word.size() << endl;
-	for_each(resultNumberPrefix2Word.begin(), resultNumberPrefix2Word.end(), [&](const string entry){
-		cout << entry << endl;
-	});
 	system("pause");
 	return 0;
 }

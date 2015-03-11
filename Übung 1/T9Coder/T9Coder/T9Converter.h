@@ -24,7 +24,6 @@ public:
 	vector<string> Number2Words(string digits, map<string, string> & wordDictionary);
 	vector<string> Number2WordsByLength(string digits, map<int, map<string, string>> & wordDictionary);
 	vector<string> T9Converter::NumberPrefix2Word(string digits, map<string, string> & wordDictionary);
-	vector<string> T9Converter::NumberPrefix2WordTest(string digits, map<string, map<string, string>> & wordDictionary)
 };
 
 #endif
