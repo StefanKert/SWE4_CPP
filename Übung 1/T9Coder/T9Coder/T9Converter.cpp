@@ -5,13 +5,29 @@
 #include <vector>
 #include <iterator>
 #include <map>
+#include <hash_map>
+#include <exception>
+#include <typeinfo>
+#include <stdexcept>
 #include "T9Converter.h"
 #include "T9MappingEntry.h"
 #include "utility.h"
 
-T9Converter::T9Converter(vector<T9MappingEntry> t9MappingEntries) : _t9MappingEntries(t9MappingEntries) {}
-
+T9Converter::T9Converter() {
+	this->InitializeT9Wordbook();
+}
 T9Converter::~T9Converter(){}
+
+void T9Converter::InitializeT9Wordbook(){
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("abc", 2));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("def", 3));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("ghi", 4));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("jkl", 5));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("mno", 6));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("pqrs", 7));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("tuv", 8));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry("wxyz", 9));
+}
 
 string T9Converter::Word2number(string word){
 	string retValue = "";
@@ -24,6 +40,19 @@ string T9Converter::Word2number(string word){
 		}
 	}
 	return retValue;
+}
+
+bool T9Converter::IsNumberValid(string digits){
+	auto wordBook = this->_t9MappingEntries;
+	for (auto digitChar : digits){
+		auto foundEntry = find_if(wordBook.begin(), wordBook.end(), [&](T9MappingEntry &entry){
+			return entry.GetMappingDigit()[0] == digitChar;
+		});
+		if (wordBook.end() == foundEntry){
+			return false;
+		}
+	}
+	return true;
 }
 
 vector<string> T9Converter::TestMethod(vector<string> alreadyInsertedEntries, T9MappingEntry entry) {
@@ -61,10 +90,12 @@ vector<string> T9Converter::Number2strings(string digits){
 			entries = this->TestMethod(entries, *foundEntry);
 		}
 	}
+
 	return entries;
 }
 
 vector<string> T9Converter::Number2Words(string digits, map<string, string> & wordDictionary){
+	clock_t begin = clock();
 	vector<string> entries;
 	auto allPossibleEntries = this->Number2strings(digits);
 	for (auto entry : allPossibleEntries){
@@ -72,6 +103,24 @@ vector<string> T9Converter::Number2Words(string digits, map<string, string> & wo
 			entries.push_back(wordDictionary[StringToUpper(entry)]);
 		}
 	}
+	clock_t end = clock();
+	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	cout << "Time for Number2Words " << elapsed_secs << endl;
+	return entries;
+}
+
+vector<string> T9Converter::Number2WordsWithHashMap(string digits, hash_map<string, string> & wordDictionary){
+	clock_t begin = clock();
+	vector<string> entries;
+	auto allPossibleEntries = this->Number2strings(digits);
+	for (auto entry : allPossibleEntries){
+		if (wordDictionary[StringToUpper(entry)] != ""){
+			entries.push_back(wordDictionary[StringToUpper(entry)]);
+		}
+	}
+	clock_t end = clock();
+	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	cout << "Time for Number2WordsWithHashMap " << elapsed_secs << endl;
 	return entries;
 }
 
