@@ -8,7 +8,6 @@
 #include <iterator>
 #include <iostream>
 #include <map>
-#include <hash_map>
 
 using namespace std;
 
@@ -20,14 +19,14 @@ public:
 	~T9Converter();
 
 	void InitializeT9Wordbook();
-	string Word2number(string word);
-	bool IsNumberValid(string digits);
+	string Word2Number(string word);
+	set<string> GetPossibleStringsForDigit(char digit);
+	bool IsNumberValid(const string& number);
 	vector<string> TestMethod(vector<string> alreadyInsertedEntries, T9MappingEntry entry);
-	vector<string> Number2strings(string digits);
-	vector<string> Number2Words(string digits, map<string, string> & wordDictionary);
-	vector<string> Number2WordsByLength(string digits, map<int, map<string, string>> & wordDictionary);
-	vector<string> T9Converter::NumberPrefix2Word(string digits, map<string, string> & wordDictionary);
-	vector<string> T9Converter::Number2WordsWithHashMap(string digits, hash_map<string, string> & wordDictionary);
+	set<string> Number2Strings(const string& number);
+	vector<string> Number2Words(const string& number, map<string, string> & wordDictionary);
+	vector<string> Number2WordsByLength(const string& number, map<int, map<string, string>> & wordDictionary);
+	vector<string> T9Converter::NumberPrefix2Word(const string& number, map<string, string> & wordDictionary);
 };
 
 #endif

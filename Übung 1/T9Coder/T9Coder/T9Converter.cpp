@@ -5,7 +5,6 @@
 #include <vector>
 #include <iterator>
 #include <map>
-#include <hash_map>
 #include <exception>
 #include <typeinfo>
 #include <stdexcept>
@@ -19,32 +18,31 @@ T9Converter::T9Converter() {
 T9Converter::~T9Converter(){}
 
 void T9Converter::InitializeT9Wordbook(){
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("abc", 2));
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("def", 3));
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("ghi", 4));
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("jkl", 5));
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("mno", 6));
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("pqrs", 7));
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("tuv", 8));
-	this->_t9MappingEntries.push_back(*new T9MappingEntry("wxyz", 9));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "a", "b", "c" }, 2));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "d", "e", "f" }, 3));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "g", "h", "i" }, 4));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "j", "k", "l" }, 5));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "m", "n", "o" }, 6));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "p", "q", "r", "s" }, 7));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "t", "u", "v" }, 8));
+	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "w", "x", "y", "z" }, 9));
 }
 
-string T9Converter::Word2number(string word){
-	string retValue = "";
-	auto wordBook = this->_t9MappingEntries;
-	for (auto character : word){
-		for (auto entry : wordBook){
-			if (entry.IsCharAvailableInMappingEntry(character)){
-				retValue += entry.GetMappingDigit();
-			}
-		}
+set<string> T9Converter::GetPossibleStringsForDigit(char digit){
+	auto foundEntry = find_if(this->_t9MappingEntries.begin(), this->_t9MappingEntries.end(), [&](T9MappingEntry &entry){
+		return entry.GetMappingDigit()[0] == digit;
+	});
+	if (this->_t9MappingEntries.end() == foundEntry){
+		throw "No entry found for " + digit;
 	}
-	return retValue;
+	else{
+		return (*foundEntry).GetMappingChars();
+	}
 }
 
-bool T9Converter::IsNumberValid(string digits){
+bool T9Converter::IsNumberValid(const string& number){
 	auto wordBook = this->_t9MappingEntries;
-	for (auto digitChar : digits){
+	for (auto digitChar : number){
 		auto foundEntry = find_if(wordBook.begin(), wordBook.end(), [&](T9MappingEntry &entry){
 			return entry.GetMappingDigit()[0] == digitChar;
 		});
@@ -55,82 +53,52 @@ bool T9Converter::IsNumberValid(string digits){
 	return true;
 }
 
-vector<string> T9Converter::TestMethod(vector<string> alreadyInsertedEntries, T9MappingEntry entry) {
-	vector<string> entries;
-	string mappingChars = entry.GetMappingChars();
-	if (alreadyInsertedEntries.empty()) {
-		for (auto character : mappingChars) {
-			// Workaround because casting from single char to string is not that easy
-			string s;
-			s.push_back(character);
-			entries.push_back(s);
-		}
-	}
-	else{
-		for (auto value : mappingChars) {
-			for (auto entry : alreadyInsertedEntries) {
-				entries.push_back(entry + value);
+string T9Converter::Word2Number(string word){
+	string retValue = "";
+	for (auto character : word){
+		for (auto entry : this->_t9MappingEntries){
+			if (entry.IsCharAvailableInMappingEntry(character)){
+				retValue += entry.GetMappingDigit();
 			}
 		}
 	}
-	return entries;
+	return retValue;
 }
 
-vector<string> T9Converter::Number2strings(string digits){
-	vector<string> entries;
-	auto wordBook = this->_t9MappingEntries;
-	for (auto digitChar : digits){
-		auto foundEntry = find_if(wordBook.begin(), wordBook.end(), [&](T9MappingEntry &entry){
-			return entry.GetMappingDigit()[0] == digitChar;
-		});
-		if (wordBook.end() == foundEntry){
-			throw "No entry found for " + digits;
-		}
-		else{
-			entries = this->TestMethod(entries, *foundEntry);
+set<string> T9Converter::Number2Strings(const string& number){
+	if (number.length() == 1){
+		return GetPossibleStringsForDigit(number[0]);
+	}
+	set<string> entries;
+	set<string> possibleEntries = GetPossibleStringsForDigit(number[0]);
+	set<string> allChars = Number2Strings(number.substr(1));
+
+	for (auto d : allChars){
+		for (auto entry : possibleEntries){
+			entries.insert(entry + d);
 		}
 	}
-
 	return entries;
 }
 
-vector<string> T9Converter::Number2Words(string digits, map<string, string> & wordDictionary){
-	clock_t begin = clock();
+vector<string> T9Converter::Number2Words(const string& number, map<string, string> & wordDictionary){
 	vector<string> entries;
-	auto allPossibleEntries = this->Number2strings(digits);
+	auto allPossibleEntries = this->Number2Strings(number);
 	for (auto entry : allPossibleEntries){
 		if (wordDictionary[StringToUpper(entry)] != ""){
 			entries.push_back(wordDictionary[StringToUpper(entry)]);
 		}
 	}
-	clock_t end = clock();
-	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-	cout << "Time for Number2Words " << elapsed_secs << endl;
 	return entries;
 }
 
-vector<string> T9Converter::Number2WordsWithHashMap(string digits, hash_map<string, string> & wordDictionary){
-	clock_t begin = clock();
-	vector<string> entries;
-	auto allPossibleEntries = this->Number2strings(digits);
-	for (auto entry : allPossibleEntries){
-		if (wordDictionary[StringToUpper(entry)] != ""){
-			entries.push_back(wordDictionary[StringToUpper(entry)]);
-		}
-	}
-	clock_t end = clock();
-	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-	cout << "Time for Number2WordsWithHashMap " << elapsed_secs << endl;
-	return entries;
+vector<string> T9Converter::Number2WordsByLength(const string& number, map<int, map<string, string>> & wordDictionary){
+	return this->Number2Words(number, wordDictionary[number.length()]);
 }
 
-vector<string> T9Converter::Number2WordsByLength(string digits, map<int, map<string, string>> & wordDictionary){
-	return this->Number2Words(digits, wordDictionary[digits.size()]);
-}
-
-vector<string> T9Converter::NumberPrefix2Word(string digits, map<string, string> & wordDictionary){
+vector<string> T9Converter::NumberPrefix2Word(const string& number, map<string, string> & wordDictionary){
 	vector<string> entries;
-	auto allPossibleEntries = this->Number2strings(digits);
+	auto allPossibleEntries = this->Number2Strings(number);
 	for (auto entry : allPossibleEntries){
 		for (auto pair : wordDictionary){
 			if (pair.first.substr(0, entry.size()) == StringToUpper(entry)){

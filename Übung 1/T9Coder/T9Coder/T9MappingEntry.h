@@ -4,20 +4,20 @@
 #include <string>
 #include <set>
 #include <ostream>
+#include <vector>
 
 using namespace std;
 
 class T9MappingEntry {
 private:
 	int mappingDigit;
-	string mappingChars;
+	set<string> mappingChars;
 public:
-	T9MappingEntry(string word, int digitToMap);
+	T9MappingEntry(set<string> word, int digitToMap);
 	virtual ~T9MappingEntry();
 	bool IsCharAvailableInMappingEntry(char charToCheck);
 	string GetMappingDigit();
-	string GetMappingChars();
-	friend std::ostream & operator <<  (std::ostream &os, const T9MappingEntry &e);
+	set<string> T9MappingEntry::GetMappingChars();
 };
 
 #endif 
