@@ -13,9 +13,9 @@ private:
 	int mappingDigit;
 	set<string> mappingChars;
 public:
-	T9MappingEntry(set<string> word, int digitToMap);
+	T9MappingEntry(const set<string>& word, const int& digitToMap);
 	virtual ~T9MappingEntry();
-	bool IsCharAvailableInMappingEntry(char charToCheck);
+	bool IsCharAvailableInMappingEntry(const char& charToCheck);
 	string GetMappingDigit();
 	set<string> GetMappingChars();
 };

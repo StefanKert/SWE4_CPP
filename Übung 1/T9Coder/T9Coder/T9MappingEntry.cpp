@@ -8,11 +8,11 @@
 
 using namespace std;
 
-T9MappingEntry::T9MappingEntry(set<string> charsToMap, int digitToMap) : mappingChars(charsToMap), mappingDigit(digitToMap){}
+T9MappingEntry::T9MappingEntry(const set<string>& charsToMap, const int& digitToMap) : mappingChars(charsToMap), mappingDigit(digitToMap){}
 
 T9MappingEntry::~T9MappingEntry() {}
 
-bool T9MappingEntry::IsCharAvailableInMappingEntry(char charToCheck){
+bool T9MappingEntry::IsCharAvailableInMappingEntry(const char& charToCheck){
 	return find_if(this->mappingChars.begin(), this->mappingChars.end(), [&](string mappingChar){
 		return mappingChar[0] == tolower(charToCheck);
 	}) != this->mappingChars.end();

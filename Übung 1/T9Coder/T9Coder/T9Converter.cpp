@@ -27,7 +27,7 @@ void T9Converter::InitializeT9Wordbook(){
 	this->_t9MappingEntries.push_back(*new T9MappingEntry({ "w", "x", "y", "z" }, 9));
 }
 
-set<string> T9Converter::GetPossibleStringsForDigit(char digit){
+set<string> T9Converter::GetPossibleStringsForDigit(const char& digit){
 	auto foundEntry = find_if(this->_t9MappingEntries.begin(), this->_t9MappingEntries.end(), [&](T9MappingEntry &entry){
 		return entry.GetMappingDigit()[0] == digit;
 	});
@@ -52,7 +52,7 @@ bool T9Converter::IsNumberValid(const string& number){
 	return true;
 }
 
-string T9Converter::Word2Number(string word){
+string T9Converter::Word2Number(const string& word){
 	string retValue = "";
 	if(word.empty()){
         throw invalid_argument("The parameter word was empty");
@@ -112,7 +112,7 @@ vector<string> T9Converter::NumberPrefix2Word(const string& number, set<string> 
  	return entries;
 }
 
-vector<string> T9Converter::NumberPrefix2WordSortedWords(const string& number, set<string> & wordDictionary, map<string,int, IgnoreCaseCmp> wordDictionaryWithCount){
+vector<string> T9Converter::NumberPrefix2WordSortedWords(const string& number, set<string> & wordDictionary, map<string,int, IgnoreCaseCmp> & wordDictionaryWithCount){
 	vector<string> entries = this->NumberPrefix2Word(number, wordDictionary);
 	sort(entries.begin(), entries.end(), [&](const string& a, const string& b) -> bool {
         return wordDictionaryWithCount[a] > wordDictionaryWithCount[b];
