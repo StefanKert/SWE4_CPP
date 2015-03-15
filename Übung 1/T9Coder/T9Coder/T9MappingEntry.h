@@ -17,7 +17,7 @@ public:
 	virtual ~T9MappingEntry();
 	bool IsCharAvailableInMappingEntry(char charToCheck);
 	string GetMappingDigit();
-	set<string> T9MappingEntry::GetMappingChars();
+	set<string> GetMappingChars();
 };
 
-#endif 
+#endif

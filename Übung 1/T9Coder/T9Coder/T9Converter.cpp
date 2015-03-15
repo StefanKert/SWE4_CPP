@@ -1,13 +1,12 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <algorithm>  
+#include <algorithm>
 #include <vector>
 #include <iterator>
 #include <map>
-#include <exception>
-#include <typeinfo>
-#include <stdexcept>
+#include <strings.h>
+
 #include "T9Converter.h"
 #include "T9MappingEntry.h"
 #include "utility.h"
@@ -55,6 +54,9 @@ bool T9Converter::IsNumberValid(const string& number){
 
 string T9Converter::Word2Number(string word){
 	string retValue = "";
+	if(word.empty()){
+        throw invalid_argument("The parameter word was empty");
+	}
 	for (auto character : word){
 		for (auto entry : this->_t9MappingEntries){
 			if (entry.IsCharAvailableInMappingEntry(character)){
@@ -66,12 +68,15 @@ string T9Converter::Word2Number(string word){
 }
 
 set<string> T9Converter::Number2Strings(const string& number){
+    if(!IsNumberValid(number)){
+        throw invalid_argument("The parameter number is empty or contains a invalid digit. Only from 2-9 allowed.");
+    }
 	if (number.length() == 1){
 		return GetPossibleStringsForDigit(number[0]);
 	}
 	set<string> entries;
-	set<string> possibleEntries = GetPossibleStringsForDigit(number[0]);
 	set<string> allChars = Number2Strings(number.substr(1));
+	set<string> possibleEntries = GetPossibleStringsForDigit(number[0]);
 
 	for (auto d : allChars){
 		for (auto entry : possibleEntries){
@@ -96,17 +101,22 @@ vector<string> T9Converter::Number2WordsByLength(const string& number, map<int, 
 	return this->Number2Words(number, wordDictionary[number.length()]);
 }
 
-vector<string> T9Converter::NumberPrefix2Word(const string& number, map<string, string> & wordDictionary){
+vector<string> T9Converter::NumberPrefix2Word(const string& number, set<string> & wordDictionary){
 	vector<string> entries;
 	auto allPossibleEntries = this->Number2Strings(number);
 	for (auto entry : allPossibleEntries){
-		for (auto pair : wordDictionary){
-			if (pair.first.substr(0, entry.size()) == StringToUpper(entry)){
-				if (pair.second != ""){
-					entries.push_back(pair.second);
-				}
-			}
+		for (auto it = wordDictionary.lower_bound(entry); it != wordDictionary.lower_bound(IncrementString(entry)); ++it){
+            entries.push_back(*it);
 		}
 	}
  	return entries;
 }
+
+vector<string> T9Converter::NumberPrefix2WordSortedWords(const string& number, set<string> & wordDictionary, map<string,int, IgnoreCaseCmp> wordDictionaryWithCount){
+	vector<string> entries = this->NumberPrefix2Word(number, wordDictionary);
+	sort(entries.begin(), entries.end(), [&](const string& a, const string& b) -> bool {
+        return wordDictionaryWithCount[a] > wordDictionaryWithCount[b];
+    });
+    return entries;
+}
+

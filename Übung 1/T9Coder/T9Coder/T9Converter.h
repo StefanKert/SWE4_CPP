@@ -3,6 +3,7 @@
 
 
 #include "T9MappingEntry.h"
+#include "utility.h"
 #include <iomanip>
 #include <ostream>
 #include <iterator>
@@ -12,21 +13,21 @@
 using namespace std;
 
 class T9Converter {
-private: 
+private:
 	vector<T9MappingEntry> _t9MappingEntries;
+    set<string> GetPossibleStringsForDigit(char digit);
 public:
 	T9Converter();
 	~T9Converter();
 
 	void InitializeT9Wordbook();
 	string Word2Number(string word);
-	set<string> GetPossibleStringsForDigit(char digit);
 	bool IsNumberValid(const string& number);
-	vector<string> TestMethod(vector<string> alreadyInsertedEntries, T9MappingEntry entry);
 	set<string> Number2Strings(const string& number);
 	vector<string> Number2Words(const string& number, map<string, string> & wordDictionary);
 	vector<string> Number2WordsByLength(const string& number, map<int, map<string, string>> & wordDictionary);
-	vector<string> T9Converter::NumberPrefix2Word(const string& number, map<string, string> & wordDictionary);
+	vector<string> NumberPrefix2Word(const string& number, set<string> & wordDictionary);
+	vector<string> NumberPrefix2WordSortedWords(const string& number, set<string> & wordDictionary, map<string,int, IgnoreCaseCmp> wordDictionaryWithCount);
 };
 
 #endif
