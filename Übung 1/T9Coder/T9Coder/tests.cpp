@@ -25,6 +25,14 @@ void Tests::TestWord2Number(string test){
             cerr << "Invalid Argument exception was caught. Exception text was: " << ex.what() << endl;
         }
     }
+    else if(strcmp(test.c_str(), "InvalidWord") == 0){
+        try {
+            cout << "Test: Word2Number-InvalidWord" << endl;
+            cout << _converter.Word2Number("&hae34djfl4@") << endl;
+        } catch(const invalid_argument &ex){
+            cerr << "Invalid Argument exception was caught. Exception text was: " << ex.what() << endl;
+        }
+    }
     else if(strcmp(test.c_str(), "PrintResult") == 0){
         cout << "Test: Word2Number-PrintResult" << endl;
         cout << "Bier = " << _converter.Word2Number("Bier") << endl;
@@ -202,6 +210,8 @@ void Tests::TestAll(){
     cout << "------------------------------------------------------" << endl;
     cout << "------------------------------------------------------" << endl;
     TestWord2Number("NoInput");
+    cout << endl << endl;
+    TestWord2Number("InvalidNumber");
     cout << endl << endl;
     TestWord2Number("PrintResult");
     cout << "------------------------------------------------------" << endl;

@@ -15,11 +15,11 @@ using namespace std;
 
 class Tests {
 private:
+    T9Converter _converter;
 	set<string> _setWordDictionary;
     map<string, string>  _wordDictionary;
     map<int, map<string, string>> _wordWithLengthDictionary;
     map<string, int, IgnoreCaseCmp> _wordWithCountDictionary;
-    T9Converter _converter;
 public:
 	Tests(T9Converter &converter, set<string> &setWordDictionary, map<string, string>  &wordDictionary, map<int, map<string, string>> &wordWithLengthDictionary, map<string, int, IgnoreCaseCmp> &wordWithCountDictionary);
 	~Tests();

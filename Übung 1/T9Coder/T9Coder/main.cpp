@@ -23,36 +23,26 @@ static T9Converter Converter;
 
 void loadDictionaries(){
 	ReadAllLinesFromFile("de_neu.dic", [&](const string &line){
-		if (line.find("%") != 0){
-			SetWordDictionary.insert(line);
-			WordDictionary[StringToUpper(line)] = line;
-			WordWithLengthDictionary[line.size()].insert(make_pair(StringToUpper(line), line));
-			WordWithCountDictionary[line] = 0;
+		if (line.find("%") != 0){ // In our dictionary file we have some comments we need to get rid of them
+			SetWordDictionary.insert(line); // Init set with line
+			WordDictionary[StringToUpper(line)] = line; // Saving the current line to the Dictionary with the line in upper cases as key
+			WordWithLengthDictionary[line.size()].insert(make_pair(StringToUpper(line), line)); // Saving the current line with the upper case key to the dictionary with the line length as key
+			WordWithCountDictionary[line] = 0; // Init Dictionary with line
 		}
 	});
 }
 void loadCountOfWords(){
 	ReadAllWordsFromFile("dasParfum.txt", [&](string word){
         if (WordWithCountDictionary.find(word) == WordWithCountDictionary.end()) {
-            WordWithCountDictionary[word] = 1;
+            WordWithCountDictionary[word] = 1; // If element is not existing in the Dictionary init it with 1
         }
         else {
-            WordWithCountDictionary[word] += 1;
+            WordWithCountDictionary[word] += 1; // If the element already exists increase the count with 1
         }
 	});
 }
 
-void InitializeDictionaries(){
-	loadDictionaries();
-	loadCountOfWords();
-}
-
-/**
-                        clock_t begin = clock();
-                        clock_t end = clock();
-                        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-**/
-
+//This function shows the menu where the user can select the action which should be performed
 void StartProgrammWithMenu(){
 	bool finished = false;
 	int option = 0;
@@ -151,7 +141,7 @@ void StartProgrammWithMenu(){
             catch (bad_alloc &e){
                 cout << e.what() << endl;
             }
-            catch (...){
+            catch (...){ // Catch every exception block
                 cout << "Ein schwerer Fehler ist aufgetreten der nicht erkannt werden konnte bitte starten Sie das Programm neu. " << endl;
             }
         }
@@ -160,9 +150,10 @@ void StartProgrammWithMenu(){
 int main(int argc, char *argv[]) {
 	T9Converter converter;
 	Converter = converter;
-	InitializeDictionaries();
+	loadDictionaries();
+	loadCountOfWords();
     Tests tests(Converter, SetWordDictionary, WordDictionary, WordWithLengthDictionary, WordWithCountDictionary);
-	if(argc > 1 && strcmp(argv[1], "Test") == 0){
+	if(argc > 1 && strcmp(argv[1], "Test") == 0){ // If tests should be executed the command line arg 'Test' should be passed
         if(argc > 2 && strcmp(argv[2], "Word2Number") == 0){
             tests.TestWord2Number(argv[3]);
         }
@@ -185,7 +176,7 @@ int main(int argc, char *argv[]) {
             tests.TestAll();
         }
 	}
-	else{
+	else{ // If no command line args are available we show the programm menu
         StartProgrammWithMenu();
 	}
 

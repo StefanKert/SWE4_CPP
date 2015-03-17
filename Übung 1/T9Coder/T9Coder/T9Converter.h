@@ -23,6 +23,7 @@ public:
 	void InitializeT9Wordbook();
 	string Word2Number(const string& word);
 	bool IsNumberValid(const string& number);
+	bool IsWordValid(const string& word);
 	set<string> Number2Strings(const string& number);
 	vector<string> Number2Words(const string& number, map<string, string> & wordDictionary);
 	vector<string> Number2WordsByLength(const string& number, map<int, map<string, string>> & wordDictionary);
