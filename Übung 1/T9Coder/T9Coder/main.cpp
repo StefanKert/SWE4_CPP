@@ -11,6 +11,7 @@
 #include "T9MappingEntry.h"
 #include "T9Converter.h"
 #include "utility.h"
+#include "tests.h"
 
 using namespace std;
 
@@ -18,10 +19,9 @@ static set<string> SetWordDictionary;
 static map<string, string>  WordDictionary;
 static map<int, map<string, string>> WordWithLengthDictionary;
 static map<string, int, IgnoreCaseCmp> WordWithCountDictionary;
+static T9Converter Converter;
 
-
-void loadDictionaries(T9Converter & converter){
-	clock_t begin = clock();
+void loadDictionaries(){
 	ReadAllLinesFromFile("de_neu.dic", [&](const string &line){
 		if (line.find("%") != 0){
 			SetWordDictionary.insert(line);
@@ -30,13 +30,9 @@ void loadDictionaries(T9Converter & converter){
 			WordWithCountDictionary[line] = 0;
 		}
 	});
-	clock_t end = clock();
-	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-	//cout << "Time for loading File with second method " << elapsed_secs << endl;
 }
 void loadCountOfWords(){
-	clock_t begin = clock();
-	ReadAllWordsFromFile("test.txt", [&](string word){
+	ReadAllWordsFromFile("dasParfum.txt", [&](string word){
         if (WordWithCountDictionary.find(word) == WordWithCountDictionary.end()) {
             WordWithCountDictionary[word] = 1;
         }
@@ -44,60 +40,23 @@ void loadCountOfWords(){
             WordWithCountDictionary[word] += 1;
         }
 	});
-	clock_t end = clock();
-	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-	//cout << "Time for loading File with second method " << elapsed_secs << endl;
 }
 
-void InitializeDictionaries(T9Converter & converter){
-	//cout << "Load dictionary from disk.... " << endl;
-	loadDictionaries(converter);
+void InitializeDictionaries(){
+	loadDictionaries();
 	loadCountOfWords();
-	//cout << "Dictionary succesfully loaded. (" << WordDictionary.size() << " Entries) " << endl;
 }
 
-int main(int argc, char *argv[]) {
-	T9Converter converter;
-	InitializeDictionaries(converter);
+/**
+                        clock_t begin = clock();
+                        clock_t end = clock();
+                        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+**/
 
+void StartProgrammWithMenu(){
 	bool finished = false;
 	int option = 0;
 
-	if(argc > 1 && strcmp(argv[1], "Test") == 0){
-        if(argc > 2 && strcmp(argv[2], "Word2Number") == 0){
-            if(argc == 4 && strcmp(argv[3], "NoInput") == 0){
-                try {
-                 cout << endl << endl << "Testing Word2Number with no Input" << endl;
-                 cout << converter.Word2Number("") << endl;
-                } catch(const invalid_argument &ex){
-                    cerr << "Invalid Argument exception was caught. Exception text was: " << ex.what() << endl;
-                }
-            }
-            else{
-                cout << endl << endl << "Testing Word2Number" << endl;
-                cout << "Bier = " << converter.Word2Number("Bier") << endl;
-                cout << "Superman = " << converter.Word2Number("Superman") << endl;
-                cout << "Hausfrauenbingo = " << converter.Word2Number("Hausfrauenbingo") << endl << endl;
-            }
-        }
-        if(argc > 2 && strcmp(argv[2], "Number2Strings") == 0){
-            if(argc == 4 && strcmp(argv[3], "NoInput") == 0){
-                try {
-                 cout << endl << endl << "Testing Word2Number with no Input" << endl;
-                 cout << converter.Word2Number("") << endl;
-                } catch(const invalid_argument &ex){
-                    cerr << "Invalid Argument exception was caught. Exception text was: " << ex.what() << endl;
-                }
-            }
-            else{
-                cout << endl << endl << "Testing Word2Number" << endl;
-                cout << "Bier = " << converter.Word2Number("Bier") << endl;
-                cout << "Superman = " << converter.Word2Number("Superman") << endl;
-                cout << "Hausfrauenbingo = " << converter.Word2Number("Hausfrauenbingo") << endl << endl;
-            }
-        }
-	}
-	else {
 	 while (!finished){
             try{
                 cout << "Geben Sie an welche der untenstehenden Optionen Sie ausfuehren wollen:" << endl;
@@ -113,87 +72,59 @@ int main(int argc, char *argv[]) {
                     cout << "Bitte geben Sie das gewuenschte Wort ein: " << endl;
                     string wordToConvert;
                     cin >> wordToConvert;
-                    clock_t begin = clock();
-                    auto result = converter.Word2Number(wordToConvert);
-                    clock_t end = clock();
-                    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+                    auto result = Converter.Word2Number(wordToConvert);
                     cout << "Word2Number: " << wordToConvert << " = " << result << endl;
-                    cout << "Time for Word2Number " << elapsed_secs << endl;
                 }
                 else if (option == 2){
                     cout << "Bitte geben Sie die gewuenschte Nummer an: " << endl;
                     string numberToConvert = "";
                     cin >> numberToConvert;
-                    if (!converter.IsNumberValid(numberToConvert)){
+                    if (!Converter.IsNumberValid(numberToConvert)){
                         cout << "Die angegebene Nummer war ungueltig. Die Nummer darf nur Zahlen von 2 - 9 enthalten." << endl;
                     }
                     else{
-                        clock_t begin = clock();
-                        auto result = converter.Number2Strings(numberToConvert);
-                        clock_t end = clock();
-                        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+                        auto result = Converter.Number2Strings(numberToConvert);
                         cout << "Number2strings: " << numberToConvert << " = " << result.size() << endl;
-                        cout << "Time for Number2Strings " << elapsed_secs << endl;
-                                            for_each(result.begin(), result.end(), [&](const string entry){
-                            cout << entry << endl;
-                        });
+                        PrintResultsForT9ConverterResult(result);
                     }
                 }
                 else if (option == 3){
                     cout << "Bitte geben Sie die gewuenschte Nummer an: " << endl;
                     string numberToConvert = "";
                     cin >> numberToConvert;
-                    if (!converter.IsNumberValid(numberToConvert)){
+                    if (!Converter.IsNumberValid(numberToConvert)){
                         cout << "Die angegebene Nummer war ungueltig. Die Nummer darf nur Zahlen von 2 - 9 enthalten." << endl;
                     }
                     else{
-                        clock_t begin = clock();
-                        auto result = converter.Number2Words(numberToConvert, WordDictionary);
-                        clock_t end = clock();
-                        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+                        auto result = Converter.Number2Words(numberToConvert, WordDictionary);
                         cout << "Number2Words: " << numberToConvert << " = " << result.size() << endl;
-                        cout << "Time for Number2Words " << elapsed_secs << endl;
-                        for_each(result.begin(), result.end(), [&](const string entry){
-                            cout << entry << endl;
-                        });
+                        PrintResultsForT9ConverterResult(result);
                     }
                 }
                 else if (option == 4){
                     cout << "Bitte geben Sie die gewünschte Nummer an: " << endl;
                     string numberToConvert = "";
                     cin >> numberToConvert;
-                    if (!converter.IsNumberValid(numberToConvert)){
+                    if (!Converter.IsNumberValid(numberToConvert)){
                         cout << "Die angegebene Nummer war ungueltig. Die Nummer darf nur Zahlen von 2 - 9 enthalten." << endl;
                     }
                     else{
-                        clock_t begin = clock();
-                        auto result = converter.Number2WordsByLength(numberToConvert, WordWithLengthDictionary);
-                        clock_t end = clock();
-                        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+                        auto result = Converter.Number2WordsByLength(numberToConvert, WordWithLengthDictionary);
                         cout << "Number2WordsByLength: " << numberToConvert << " = " << result.size() << endl;
-                        cout << "Time for Number2WordsByLength " << elapsed_secs << endl;
-                        for_each(result.begin(), result.end(), [&](const string entry){
-                            cout << entry << endl;
-                        });
+                        PrintResultsForT9ConverterResult(result);
                     }
                 }
                 else if (option == 5){
                     cout << "Bitte geben Sie die gewuenschte Nummer an: " << endl;
                     string numberToConvert = "";
                     cin >> numberToConvert;
-                    if (!converter.IsNumberValid(numberToConvert)){
+                    if (!Converter.IsNumberValid(numberToConvert)){
                         cout << "Die angegebene Nummer war ungueltig. Die Nummer darf nur Zahlen von 2 - 9 enthalten." << endl;
                     }
                     else{
-                        clock_t begin = clock();
-                        auto result = converter.NumberPrefix2Word(numberToConvert, SetWordDictionary);
-                        clock_t end = clock();
-                        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+                        auto result = Converter.NumberPrefix2Word(numberToConvert, SetWordDictionary);
                         cout << "NumberPrefix2Word: " << numberToConvert << " = " << result.size() << endl;
-                        cout << "Time for NumberPrefix2Word " << elapsed_secs << endl;
-                        for_each(result.begin(), result.end(), [&](const string entry){
-                            cout << entry << endl;
-                        });
+                        PrintResultsForT9ConverterResult(result);
                     }
 
                 }
@@ -201,19 +132,13 @@ int main(int argc, char *argv[]) {
                     cout << "Bitte geben Sie die gewuenschte Nummer an: " << endl;
                     string numberToConvert = "";
                     cin >> numberToConvert;
-                    if (!converter.IsNumberValid(numberToConvert)){
+                    if (!Converter.IsNumberValid(numberToConvert)){
                         cout << "Die angegebene Nummer war ungueltig. Die Nummer darf nur Zahlen von 2 - 9 enthalten." << endl;
                     }
                     else{
-                        clock_t begin = clock();
-                        auto result = converter.NumberPrefix2WordSortedWords(numberToConvert, SetWordDictionary, WordWithCountDictionary);
-                        clock_t end = clock();
-                        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-                        cout << "NumberPrefix2Word: " << numberToConvert << " = " << result.size() << endl;
-                        cout << "Time for NumberPrefix2Word " << elapsed_secs << endl;
-                        for_each(result.begin(), result.end(), [&](const string entry){
-                            cout << entry << endl;
-                        });
+                        auto result = Converter.NumberPrefix2SortedWords(numberToConvert, SetWordDictionary, WordWithCountDictionary);
+                        cout << "NumberPrefix2SortedWords: " << numberToConvert << " = " << result.size() << endl;
+                        PrintResultsForT9ConverterResult(result);
                     }
                 }
                 else if (option == 7){
@@ -230,6 +155,38 @@ int main(int argc, char *argv[]) {
                 cout << "Ein schwerer Fehler ist aufgetreten der nicht erkannt werden konnte bitte starten Sie das Programm neu. " << endl;
             }
         }
+}
+
+int main(int argc, char *argv[]) {
+	T9Converter converter;
+	Converter = converter;
+	InitializeDictionaries();
+    Tests tests(Converter, SetWordDictionary, WordDictionary, WordWithLengthDictionary, WordWithCountDictionary);
+	if(argc > 1 && strcmp(argv[1], "Test") == 0){
+        if(argc > 2 && strcmp(argv[2], "Word2Number") == 0){
+            tests.TestWord2Number(argv[3]);
+        }
+        else if(argc > 2 && strcmp(argv[2], "Number2Strings") == 0){
+            tests.TestNumber2Strings(argv[3]);
+        }
+        else if(argc > 2 && strcmp(argv[2], "Number2Words") == 0){
+            tests.TestNumber2Words(argv[3]);
+        }
+        else if(argc > 2 && strcmp(argv[2], "Number2WordsByLength") == 0){
+            tests.TestNumber2WordsByLength(argv[3]);
+        }
+        else if(argc > 2 && strcmp(argv[2], "NumberPrefix2Word") == 0){
+            tests.TestNumberPrefix2Word(argv[3]);
+        }
+        else if(argc > 2 && strcmp(argv[2], "NumberPrefix2SortedWords") == 0){
+            tests.TestNumberPrefix2SortedWords(argv[3]);
+        }
+        else{
+            tests.TestAll();
+        }
+	}
+	else{
+        StartProgrammWithMenu();
 	}
 
 	return 0;

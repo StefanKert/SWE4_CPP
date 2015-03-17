@@ -48,3 +48,16 @@ string IncrementString(const string& str) {
         return length > 1 ? IncrementString(str.substr(0, length - 1)) + 'a' : "aa";
     return str.substr(0, length - 1) + ++c;
 }
+
+
+void PrintResultsForT9ConverterResult(set<string> resultToPrint){
+    for(auto entry : resultToPrint){
+        cout << entry << endl;
+    }
+}
+
+void PrintResultsForT9ConverterResult(vector<string> resultToPrint){
+    for(auto entry : resultToPrint){
+        cout << entry << endl;
+    }
+}

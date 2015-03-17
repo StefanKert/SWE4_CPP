@@ -40,6 +40,9 @@ set<string> T9Converter::GetPossibleStringsForDigit(const char& digit){
 }
 
 bool T9Converter::IsNumberValid(const string& number){
+	if(number.empty()){
+        return false;
+	}
 	auto wordBook = this->_t9MappingEntries;
 	for (auto digitChar : number){
 		auto foundEntry = find_if(wordBook.begin(), wordBook.end(), [&](T9MappingEntry &entry){
@@ -87,6 +90,9 @@ set<string> T9Converter::Number2Strings(const string& number){
 }
 
 vector<string> T9Converter::Number2Words(const string& number, map<string, string> & wordDictionary){
+    if(!IsNumberValid(number)){
+        throw invalid_argument("The parameter number is empty or contains a invalid digit. Only from 2-9 allowed.");
+    }
 	vector<string> entries;
 	auto allPossibleEntries = this->Number2Strings(number);
 	for (auto entry : allPossibleEntries){
@@ -102,21 +108,25 @@ vector<string> T9Converter::Number2WordsByLength(const string& number, map<int, 
 }
 
 vector<string> T9Converter::NumberPrefix2Word(const string& number, set<string> & wordDictionary){
+    if(!IsNumberValid(number)){
+        throw invalid_argument("The parameter number is empty or contains a invalid digit. Only from 2-9 allowed.");
+    }
 	vector<string> entries;
 	auto allPossibleEntries = this->Number2Strings(number);
 	for (auto entry : allPossibleEntries){
-		for (auto it = wordDictionary.lower_bound(entry); it != wordDictionary.lower_bound(IncrementString(entry)); ++it){
-            entries.push_back(*it);
-		}
+        auto dictionaryEntry = wordDictionary.lower_bound(entry);
+        while(dictionaryEntry != wordDictionary.lower_bound(IncrementString(entry))){
+             entries.push_back(*dictionaryEntry);
+             ++dictionaryEntry;
+        }
 	}
  	return entries;
 }
 
-vector<string> T9Converter::NumberPrefix2WordSortedWords(const string& number, set<string> & wordDictionary, map<string,int, IgnoreCaseCmp> & wordDictionaryWithCount){
+vector<string> T9Converter::NumberPrefix2SortedWords(const string& number, set<string> & wordDictionary, map<string,int, IgnoreCaseCmp> & wordDictionaryWithCount){
 	vector<string> entries = this->NumberPrefix2Word(number, wordDictionary);
 	sort(entries.begin(), entries.end(), [&](const string& a, const string& b) -> bool {
         return wordDictionaryWithCount[a] > wordDictionaryWithCount[b];
     });
     return entries;
 }
-
