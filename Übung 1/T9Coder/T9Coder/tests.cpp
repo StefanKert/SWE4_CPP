@@ -248,8 +248,6 @@ void Tests::TestAll(){
     TestNumberPrefix2Word("InvalidNumber");
     cout << endl << endl;
     TestNumberPrefix2Word("ResultCount");
-    cout << endl << endl;
-    //TestNumberPrefix2Word("PrintResult");
     cout << "------------------------------------------------------" << endl;
     cout << "------------------------------------------------------" << endl;
     TestNumberPrefix2SortedWords("NoInput");
@@ -257,8 +255,6 @@ void Tests::TestAll(){
     TestNumberPrefix2SortedWords("InvalidNumber");
     cout << endl << endl;
     TestNumberPrefix2SortedWords("ResultCount");
-    cout << endl << endl;
-    //TestNumberPrefix2WordSortedWords("PrintResult");
     cout << "------------------------------------------------------" << endl;
     cout << "------------------------------------------------------" << endl;
 }

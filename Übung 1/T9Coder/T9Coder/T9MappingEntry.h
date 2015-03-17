@@ -10,8 +10,8 @@ using namespace std;
 
 class T9MappingEntry {
 private:
-	int mappingDigit;
 	set<string> mappingChars;
+		int mappingDigit;
 public:
 	T9MappingEntry(const set<string>& word, const int& digitToMap);
 	virtual ~T9MappingEntry();

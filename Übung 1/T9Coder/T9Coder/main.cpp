@@ -147,6 +147,51 @@ void StartProgrammWithMenu(){
         }
 }
 
+
+/**
+The Program can be started with the following Command Line Args
+-- No Params
+The startmenu is executed
+
+
+-- This Command performs all available tests, but not the Print Result tests for Number2Words, NumberPrefix2Word and NumberPrefix2SortedWords
+Test
+
+-- This Commands Perform the tests for the function Word2Number
+Test Word2Number NoInput
+Test Word2Number InvalidNumber
+Test Word2Number PrintResult
+
+-- This Commands Perform the tests for the function Number2Strings
+Test Number2Strings NoInput
+Test Number2Strings InvalidNumber
+Test Number2Strings ResultCount
+Test Number2Strings PrintResult
+
+-- This Commands Perform the tests for the function Number2Words
+Test Number2Words NoInput
+Test Number2Words InvalidNumber
+Test Number2Words ResultCount
+Test Number2Words PrintResult
+
+-- This Commands Perform the tests for the function Number2WordsByLength
+Test Number2WordsByLength NoInput
+Test Number2WordsByLength InvalidNumber
+Test Number2WordsByLength ResultCount
+Test Number2WordsByLength PrintResult
+
+-- This Commands Perform the tests for the function NumberPrefix2Word
+Test NumberPrefix2Word NoInput
+Test NumberPrefix2Word InvalidNumber
+Test NumberPrefix2Word ResultCount
+Test NumberPrefix2Word PrintResult
+
+-- This Commands Perform the tests for the function NumberPrefix2SortedWords
+Test NumberPrefix2SortedWords NoInput
+Test NumberPrefix2SortedWords InvalidNumber
+Test NumberPrefix2SortedWords ResultCount
+Test NumberPrefix2SortedWords PrintResult
+**/
 int main(int argc, char *argv[]) {
 	T9Converter converter;
 	Converter = converter;
