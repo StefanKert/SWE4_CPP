@@ -51,7 +51,7 @@ public:
 	void rehash(size_t new_n_buckets);
 	double load_factor() const;
 	size_t size() const;
-	size_t capacity();
+	size_t capacity() const;
 	bool empty() const;
 	bool operator == (const hashtable &other) const;
 
@@ -73,9 +73,17 @@ public:
 		bool operator != (const_iterator const & rhs) const;
 
 		reference operator *  () const;
-		pointer   operator -> () const;
+		pointer   operator -> () const{
+		
+		}
 
-		const_iterator & operator ++ ();
+		const_iterator & operator ++ (){
+			// difference_type ... offset in der Liste
+			// pointer .. aktuelle liste
+			// reference .. ?
+			difference_type++;
+			return this;
+		}
 		const_iterator & operator -- ();
 
 		const_iterator operator ++ (int);
@@ -85,8 +93,14 @@ public:
 
 	typedef const_iterator iterator;
 
-	const_iterator begin() const;
-	const_iterator end() const;
+	const_iterator begin() const {
+		const list<value_type>& firstList = _table.begin();
+		return firstList.begin();
+	}
+	const_iterator end() const{
+		const list<value_type>& firstList = _table.end();
+		return firstList.end();
+	}
 
 	iterator cbegin();
 	iterator cend();
@@ -101,7 +115,7 @@ private :
 	double _maxLoadFactor;
 	hash_function_type _hasher;
 	key_equal_function_type _equals;
-	size_t getHashedValue(const V& value);
+	size_t getHashedValue(const V& value) const;
 };
 
 template<typename V, typename H, typename C>
@@ -116,7 +130,7 @@ ostream & operator << (ostream & os, const hashtable<V, H, C> &ht){
 
 template <typename V, typename H, typename C>
 bool hashtable<V, H, C>::contains(const V &value) const {
-	list<value_type>& whichList = _table[getHashedValue(value)];
+	const list<value_type>& whichList = _table[getHashedValue(value)];
 	return find(whichList.begin(), whichList.end(), value) != whichList.end();
 }
 
@@ -126,26 +140,26 @@ double hashtable<V, H, C>::load_factor() const {
 }
 
 template <typename V, typename H, typename C>
-size_t hashtable<V, H, C>::size() const{
+size_t hashtable<V, H, C>::size() const {
 	return _currentSize;
 }
 
 template <typename V, typename H, typename C>
-size_t hashtable<V, H, C>::capacity(){
+size_t hashtable<V, H, C>::capacity() const {
 	return _capacity;
 }
 
 template <typename V, typename H, typename C>
-bool hashtable<V, H, C>::empty() const{
+bool hashtable<V, H, C>::empty() const {
 	return _table.empty();
 }
 
 template <typename V, typename H, typename C>
-void hashtable<V, H, C>::insert(const V &value){
+void hashtable<V, H, C>::insert(const V &value) {
 	if (!contains(value)){
 		list<value_type>& whichList = _table[getHashedValue(value)];
 		whichList.push_back(value);
-		if (++_currentSize > _maxLoadFactor * _capacity)
+		if (++_currentSize > (_maxLoadFactor * _capacity))
 			rehash(static_cast<size_t>(_currentSize * 2));
 	}
 	else{
@@ -171,8 +185,9 @@ void hashtable<V, H, C>::erase(const V &value){
 template <typename V, typename H, typename C>
 void hashtable<V, H, C>::rehash(size_t new_n_buckets){
 	vector<list<V>> old = _table;
-	_table.resize(new_n_buckets);
+	_capacity = new_n_buckets;
 	_currentSize = 0;
+	_table.resize(_capacity);
 	for (size_t i = 0; i < _table.size(); i++) {
 		_table[i].clear();
 	}
@@ -185,8 +200,8 @@ void hashtable<V, H, C>::rehash(size_t new_n_buckets){
 }
 
 template <typename V, typename H, typename C>
-size_t hashtable<V, H, C>::getHashedValue(const V& value){
-	size_t hashValue = _hasher(value) / _capacity;
+size_t hashtable<V, H, C>::getHashedValue(const V& value) const{
+	size_t hashValue = _hasher(value) % _capacity;
 	if (hashValue < 0){
 		hashValue += _table.size();
 	}
