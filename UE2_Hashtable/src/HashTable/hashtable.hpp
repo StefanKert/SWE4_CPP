@@ -39,7 +39,6 @@ public:
 		double min_load_factor = 0.2)
 		: _capacity(n_buckets), _hasher(hasher), _equals(equals), _maxLoadFactor(max_load_factor), _minLoadFactor(min_load_factor)
 	{
-		_currentSize = 0;
 		rehash(_capacity);
 	}
 
@@ -62,6 +61,11 @@ public:
 		const_reference> iterator_base;
 
 	class const_iterator : public iterator_base {
+
+	private:
+		const hashtable* _table;
+		typename vector<list<value_type>>::const_iterator _vectorIterator;
+		typename list<value_type>::const_iterator _listIterator;
 	public:
 		typedef typename iterator_base::difference_type   difference_type;
 		typedef typename iterator_base::iterator_category iterator_category;
@@ -69,43 +73,105 @@ public:
 		typedef typename iterator_base::reference         reference;
 		typedef typename iterator_base::value_type        value_type;
 
-		bool operator == (const_iterator const & rhs) const;
-		bool operator != (const_iterator const & rhs) const;
+		const_iterator(const hashtable *table) : _table(table){
+			begin();
+		}
 
-		reference operator *  () const;
+		bool operator == (const_iterator const & rhs) const{
+			return _vectorIterator == rhs._vectorIterator && _listIterator == rhs._listIterator;
+		}
+		bool operator != (const_iterator const & rhs) const{
+			return _vectorIterator != rhs._vectorIterator || _listIterator != rhs._listIterator;
+		}
+
+		reference operator *  () const{
+			return *_listIterator;
+		}
 		pointer   operator -> () const{
-		
+			return &(*_listIterator);
+		}
+
+		void begin(){
+			_vectorIterator = _table->_table.begin();
+			while (_vectorIterator != _table->_table.end() && _vectorIterator->size() == 0)
+				++_vectorIterator;
+			_listIterator = _vectorIterator->begin();
+		}
+		void end(){
+			_vectorIterator = --_table->_table.end();
+			while (_vectorIterator != _table->_table.begin() && _vectorIterator->size() == 0)
+				--_vectorIterator;
+
+			_listIterator = _vectorIterator->end();
+		}
+		void next(){
+			if (++_listIterator == _vectorIterator->end()){
+				do {
+					++_vectorIterator;
+				} while (_vectorIterator != _table->_table.end() && _vectorIterator->size() == 0);
+				if (_vectorIterator == _table->_table.end()){
+					end();
+				}
+				else{
+					_listIterator = _vectorIterator->begin();
+				}
+			}
+		}
+		void previous(){
+			if (--_listIterator == _vectorIterator->begin()){
+				--_vectorIterator;
+				if (_vectorIterator != _vectorIterator->begin())
+					_listIterator = _vectorIterator->end();
+			}
 		}
 
 		const_iterator & operator ++ (){
-			// difference_type ... offset in der Liste
-			// pointer .. aktuelle liste
-			// reference .. ?
-			difference_type++;
-			return this;
+			next();
+			return *this;
 		}
-		const_iterator & operator -- ();
+		const_iterator & operator -- (){
+			previous();
+			return *this;
+		}
 
-		const_iterator operator ++ (int);
-		const_iterator operator -- (int);
-
+		const_iterator operator ++ (int unused){
+			next();
+			return *this;
+		}
+		const_iterator operator -- (int unused){
+			previous();
+			return *this;
+		}
 	};
 
 	typedef const_iterator iterator;
 
-	const_iterator begin() const {
-		const list<value_type>& firstList = _table.begin();
-		return firstList.begin();
+	const_iterator begin() const{
+		return const_iterator(this);
 	}
-	const_iterator end() const{
-		const list<value_type>& firstList = _table.end();
-		return firstList.end();
+	const_iterator end() const {
+		auto it = const_iterator(this);
+		it.end();
+		return it;
 	}
-
-	iterator cbegin();
-	iterator cend();
-	const_iterator cbegin() const;
-	const_iterator cend() const;
+	
+	iterator cbegin() {
+		return new iterator(this);
+	}
+	iterator cend(){
+		auto it = iterator(this);
+		it.end();
+		return it;
+	}
+	
+	const_iterator cbegin() const {
+		return new iterator(this);
+	}
+	const_iterator cend() const{
+		auto it = iterator(this);
+		it.end();
+		return it;
+	}
 	
 private : 
 	vector<list<V>> _table;
@@ -120,12 +186,25 @@ private :
 
 template<typename V, typename H, typename C>
 ostream & operator << (ostream & os, const hashtable<V, H, C> &ht){
-	for (auto list : ht._table){
-		for (auto element : list){
+	for (auto element : ht){
 			os << element << endl;
-		}
 	}
 	return os;
+}
+
+template<typename V, typename H, typename C>
+bool hashtable<V, H, C>::operator == (const hashtable &other) const{
+	if (&other == this)
+		return true;
+	if (other.size() != this->size())
+		return false;
+	
+	for (auto element : other){
+		if (!this->contains(element)){
+			return false;
+		}
+	}
+	return true;
 }
 
 template <typename V, typename H, typename C>
@@ -174,7 +253,7 @@ void hashtable<V, H, C>::erase(const V &value){
 		auto elemet = find(whichList.begin(), whichList.end(), value);
 		whichList.remove(value);
 		if (--_currentSize > _minLoadFactor * _capacity){
-			rehash(static_cast<size_t>(_currentSize * 0.5))
+			rehash(static_cast<size_t>(_currentSize * 0.5));
 		}
 	}
 	else{

@@ -4,20 +4,22 @@
 #include <iostream>
 #include <iterator>
 #include <iomanip>
+#include <algorithm>
 #include "hashtable.hpp"
 
 using namespace std;
 
 int main(int argc, char** argv) {
 	cout << "Starte program " << endl;
-	hashtable<int, hash<int>, equal_to<int>> h(5, hash<int>(), equal_to<int>());
-	for (int i = 0; i < 1000; i++){
-		h.insert(i);
-	}
-	h.insert(-5);
-	cout << h.contains(2) << endl;
-	cout << h.empty() << endl;
-	cout << h.size() << endl;
-	cout << h;
 	return 0;
+}
+
+void CheckEqualAssertion(){
+	hashtable<int, hash<int>, equal_to<int>> h(5, hash<int>(), equal_to<int>());
+	hashtable<int, hash<int>, equal_to<int>> h2(100, hash<int>(), equal_to<int>());
+	for (int i = 0; i < 10; i++){
+		h.insert(i);
+		h2.insert(i);
+	}
+	cout << "Lists are the same: " << (h == h2) << endl;
 }
