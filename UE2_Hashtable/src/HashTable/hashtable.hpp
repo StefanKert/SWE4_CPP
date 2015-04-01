@@ -73,105 +73,36 @@ public:
 		typedef typename iterator_base::reference         reference;
 		typedef typename iterator_base::value_type        value_type;
 
-		const_iterator(const hashtable *table) : _table(table){
-			begin();
-		}
+		const_iterator(const hashtable *table);
 
-		bool operator == (const_iterator const & rhs) const{
-			return _vectorIterator == rhs._vectorIterator && _listIterator == rhs._listIterator;
-		}
-		bool operator != (const_iterator const & rhs) const{
-			return _vectorIterator != rhs._vectorIterator || _listIterator != rhs._listIterator;
-		}
+		bool operator == (const_iterator const & rhs) const;
+		bool operator != (const_iterator const & rhs) const;
 
-		reference operator *  () const{
-			return *_listIterator;
-		}
-		pointer   operator -> () const{
-			return &(*_listIterator);
-		}
+		reference operator *  () const;
+		pointer   operator -> () const;
 
-		void begin(){
-			_vectorIterator = _table->_table.begin();
-			while (_vectorIterator != _table->_table.end() && _vectorIterator->size() == 0)
-				++_vectorIterator;
-			_listIterator = _vectorIterator->begin();
-		}
-		void end(){
-			_vectorIterator = --_table->_table.end();
-			while (_vectorIterator != _table->_table.begin() && _vectorIterator->size() == 0)
-				--_vectorIterator;
+		void begin();
+		void end();
+		void next();
+		void previous();
 
-			_listIterator = _vectorIterator->end();
-		}
-		void next(){
-			if (++_listIterator == _vectorIterator->end()){
-				do {
-					++_vectorIterator;
-				} while (_vectorIterator != _table->_table.end() && _vectorIterator->size() == 0);
-				if (_vectorIterator == _table->_table.end()){
-					end();
-				}
-				else{
-					_listIterator = _vectorIterator->begin();
-				}
-			}
-		}
-		void previous(){
-			if (--_listIterator == _vectorIterator->begin()){
-				--_vectorIterator;
-				if (_vectorIterator != _vectorIterator->begin())
-					_listIterator = _vectorIterator->end();
-			}
-		}
+		const_iterator & operator ++ ();
+		const_iterator & operator -- ();
 
-		const_iterator & operator ++ (){
-			next();
-			return *this;
-		}
-		const_iterator & operator -- (){
-			previous();
-			return *this;
-		}
-
-		const_iterator operator ++ (int unused){
-			next();
-			return *this;
-		}
-		const_iterator operator -- (int unused){
-			previous();
-			return *this;
-		}
+		const_iterator operator ++ (int unused);
+		const_iterator operator -- (int unused);
 	};
 
 	typedef const_iterator iterator;
 
-	const_iterator begin() const{
-		return const_iterator(this);
-	}
-	const_iterator end() const {
-		auto it = const_iterator(this);
-		it.end();
-		return it;
-	}
+	const_iterator begin() const;
+	const_iterator end() const;
 	
-	iterator cbegin() {
-		return new iterator(this);
-	}
-	iterator cend(){
-		auto it = iterator(this);
-		it.end();
-		return it;
-	}
+	iterator cbegin();
+	iterator cend();
 	
-	const_iterator cbegin() const {
-		return new iterator(this);
-	}
-	const_iterator cend() const{
-		auto it = iterator(this);
-		it.end();
-		return it;
-	}
+	const_iterator cbegin() const;
+	const_iterator cend() const;
 	
 private : 
 	vector<list<V>> _table;
@@ -183,6 +114,12 @@ private :
 	key_equal_function_type _equals;
 	size_t getHashedValue(const V& value) const;
 };
+
+/*
+*----------------------------------------------------------------------------------------------------------------------------
+*	Hashtable Implementation
+*----------------------------------------------------------------------------------------------------------------------------
+*/
 
 template<typename V, typename H, typename C>
 ostream & operator << (ostream & os, const hashtable<V, H, C> &ht){
@@ -285,6 +222,138 @@ size_t hashtable<V, H, C>::getHashedValue(const V& value) const{
 		hashValue += _table.size();
 	}
 	return hashValue;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::begin() const{
+	return const_iterator(this);
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::end() const {
+	auto it = const_iterator(this);
+	it.end();
+	return it;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::iterator hashtable<V, H, C>::cbegin() {
+	return new iterator(this);
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::iterator hashtable<V, H, C>::cend(){
+	auto it = iterator(this);
+	it.end();
+	return it;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::cbegin() const {
+	return new iterator(this);
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::cend() const{
+	auto it = iterator(this);
+	it.end();
+	return it;
+}
+
+/*
+*----------------------------------------------------------------------------------------------------------------------------
+*	Iterator Implementation
+*----------------------------------------------------------------------------------------------------------------------------
+*/
+
+template <typename V, typename H, typename C>
+hashtable<V, H, C>::const_iterator::const_iterator(const hashtable *table) : _table(table){
+	begin();
+}
+
+template <typename V, typename H, typename C>
+bool hashtable<V, H, C>::const_iterator::operator == (const_iterator const & rhs) const{
+	return _vectorIterator == rhs._vectorIterator && _listIterator == rhs._listIterator;
+}
+
+template <typename V, typename H, typename C>
+bool hashtable<V, H, C>::const_iterator::operator != (const_iterator const & rhs) const{
+	return _vectorIterator != rhs._vectorIterator || _listIterator != rhs._listIterator;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator::reference hashtable<V, H, C>::const_iterator::operator *  () const{
+	return *_listIterator;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator::pointer   hashtable<V, H, C>::const_iterator::operator -> () const{
+	return &(*_listIterator);
+}
+
+template <typename V, typename H, typename C>
+void hashtable<V, H, C>::const_iterator::begin(){
+	_vectorIterator = _table->_table.begin();
+	while (_vectorIterator != _table->_table.end() && _vectorIterator->size() == 0)
+		++_vectorIterator;
+	_listIterator = _vectorIterator->begin();
+}
+
+template <typename V, typename H, typename C>
+void hashtable<V, H, C>::const_iterator::end(){
+	_vectorIterator = --_table->_table.end();
+	while (_vectorIterator != _table->_table.begin() && _vectorIterator->size() == 0)
+		--_vectorIterator;
+
+	_listIterator = _vectorIterator->end();
+}
+
+template <typename V, typename H, typename C>
+void hashtable<V, H, C>::const_iterator::next(){
+	if (++_listIterator == _vectorIterator->end()){
+		do {
+			++_vectorIterator;
+		} while (_vectorIterator != _table->_table.end() && _vectorIterator->size() == 0);
+		if (_vectorIterator == _table->_table.end()){
+			end();
+		}
+		else{
+			_listIterator = _vectorIterator->begin();
+		}
+	}
+}
+
+template <typename V, typename H, typename C>
+void hashtable<V, H, C>::const_iterator::previous(){
+	if (--_listIterator == _vectorIterator->begin()){
+		--_vectorIterator;
+		if (_vectorIterator != _vectorIterator->begin())
+			_listIterator = _vectorIterator->end();
+	}
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator & hashtable<V, H, C>::const_iterator::operator ++ (){
+	next();
+	return *this;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator & hashtable<V, H, C>::const_iterator::operator -- (){
+	previous();
+	return *this;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::const_iterator::operator ++ (int unused){
+	next();
+	return *this;
+}
+
+template <typename V, typename H, typename C>
+typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::const_iterator::operator -- (int unused){
+	previous();
+	return *this;
 }
 
 #endif // hashtable_hpp
