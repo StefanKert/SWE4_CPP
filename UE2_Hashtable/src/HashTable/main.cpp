@@ -9,11 +9,6 @@
 
 using namespace std;
 
-int main(int argc, char** argv) {
-	cout << "Starte program " << endl;
-	return 0;
-}
-
 void CheckEqualAssertion(){
 	hashtable<int, hash<int>, equal_to<int>> h(5, hash<int>(), equal_to<int>());
 	hashtable<int, hash<int>, equal_to<int>> h2(100, hash<int>(), equal_to<int>());
@@ -22,4 +17,17 @@ void CheckEqualAssertion(){
 		h2.insert(i);
 	}
 	cout << "Lists are the same: " << (h == h2) << endl;
+	cout << h << endl;
+	auto it = h.end(); 
+	do{
+		--it;
+		cout << (*it) << endl;
+	} while (it != h.begin());
+}
+
+int main(int argc, char** argv) {
+	cout << "Starte program " << endl;
+	CheckEqualAssertion();
+
+	return 0;
 }

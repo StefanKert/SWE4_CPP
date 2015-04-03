@@ -187,7 +187,6 @@ template <typename V, typename H, typename C>
 void hashtable<V, H, C>::erase(const V &value){
 	if (contains(value)){
 		list<value_type>& whichList = _table[getHashedValue(value)];
-		auto elemet = find(whichList.begin(), whichList.end(), value);
 		whichList.remove(value);
 		if (--_currentSize > _minLoadFactor * _capacity){
 			rehash(static_cast<size_t>(_currentSize * 0.5));
@@ -238,26 +237,22 @@ typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::end() const {
 
 template <typename V, typename H, typename C>
 typename hashtable<V, H, C>::iterator hashtable<V, H, C>::cbegin() {
-	return new iterator(this);
+	return begin();
 }
 
 template <typename V, typename H, typename C>
 typename hashtable<V, H, C>::iterator hashtable<V, H, C>::cend(){
-	auto it = iterator(this);
-	it.end();
-	return it;
+	return end();
 }
 
 template <typename V, typename H, typename C>
 typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::cbegin() const {
-	return new iterator(this);
+	return begin();
 }
 
 template <typename V, typename H, typename C>
 typename hashtable<V, H, C>::const_iterator hashtable<V, H, C>::cend() const{
-	auto it = iterator(this);
-	it.end();
-	return it;
+	return end();
 }
 
 /*
@@ -325,10 +320,20 @@ void hashtable<V, H, C>::const_iterator::next(){
 
 template <typename V, typename H, typename C>
 void hashtable<V, H, C>::const_iterator::previous(){
-	if (--_listIterator == _vectorIterator->begin()){
-		--_vectorIterator;
-		if (_vectorIterator != _vectorIterator->begin())
+	if (_listIterator != _vectorIterator->begin()){
+		--_listIterator;
+	}
+	else{
+		do {
+			--_vectorIterator;
+		} while (_vectorIterator != _table->_table.begin() && _vectorIterator->size() == 0);
+		if (_vectorIterator == _table->_table.begin()){
+			begin();
+		}
+		else{
 			_listIterator = _vectorIterator->end();
+			--_listIterator;
+		}
 	}
 }
 
