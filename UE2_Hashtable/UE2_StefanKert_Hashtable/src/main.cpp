@@ -92,7 +92,7 @@ void PrintListNormalAndReverseOrder(){
 	while (it != h.end()){
 		cout << (*it) << endl;
 		it++;
-	} 
+	}
 
 	cout << "Reverse order: " << endl;
 	auto reverseIt = h.end();
